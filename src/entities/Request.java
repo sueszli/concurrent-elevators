@@ -1,12 +1,15 @@
 package src.entities;
 
-import java.util.UUID;
-
 import static src.Config.NUMBER_OF_FLOORS;
 
+/**
+ * A request is a person waiting for an elevator to take them to a destination floor.
+ * Elevators resolve Requests and remove them from the Floor queue.
+ * <p>
+ * Remark: could be replaced with the apache common `Pair<Integer, Integer>`.
+ */
 public class Request {
 
-    private final UUID id;
     private final int srcFloor;
     private final int dstFloor;
 
@@ -24,7 +27,6 @@ public class Request {
             throw new IllegalArgumentException("Illegal destination for non-ground-floor (not ground-floor): " + dstFloor);
         }
 
-        this.id = UUID.randomUUID();
         this.srcFloor = srcFloor;
         this.dstFloor = dstFloor;
     }
@@ -35,26 +37,6 @@ public class Request {
 
     public int getDstFloor() {
         return dstFloor;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        Request rhs = (Request) obj;
-        return this.id.equals(rhs.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return id.hashCode();
     }
 
     @Override

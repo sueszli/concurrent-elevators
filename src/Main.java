@@ -3,7 +3,6 @@ package src;
 import src.entities.Floor;
 import src.entities.Request;
 
-import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import static src.Config.NUMBER_OF_FLOORS;
@@ -24,16 +23,15 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // Initialize the floors with random requests
-        Floor[] floors = new Floor[NUMBER_OF_FLOORS];
-        int maxRequests = 5;
+        // initialize floors with random requests
+        var floors = new Floor[NUMBER_OF_FLOORS];
+        var maxRequests = 5;
         IntStream.range(0, NUMBER_OF_FLOORS).forEach(i -> {
             floors[i] = new Floor();
-            int numRequests = (int) (Math.random() * maxRequests);
+            var numRequests = (int) (Math.random() * maxRequests);
             IntStream.range(0, numRequests).forEach(j -> floors[i].addRequest(generateRequest(i)));
         });
-
-
         printFloors(floors);
+
     }
 }

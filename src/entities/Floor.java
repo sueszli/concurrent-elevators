@@ -7,6 +7,7 @@ public class Floor {
 
     public void addRequest(Request request) {
         REQUEST_QUEUE.add(request);
+
     }
 
     public Request getRequest() {
