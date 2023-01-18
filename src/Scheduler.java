@@ -1,16 +1,17 @@
 package src;
 
+import java.util.AbstractMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
-import static src.Config.NUM_ELEVATORS;
-import static src.Config.QUEUE_SIZE;
+import static src.Main.*;
 
+// performance could be improved by using a thread pool and increasing the granularity of the locks
 public class Scheduler implements Runnable {
 
-    private final BlockingQueue<Request> requestQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
+    private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Integer>> requestQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentHashMap<Integer, Elevator> elevators = new ConcurrentHashMap<>();
     private boolean alive = true;
 
@@ -18,21 +19,30 @@ public class Scheduler implements Runnable {
         new Thread(this, "scheduler").start();
     }
 
-    public boolean sendRequest(int src, int dst) {
-        return this.requestQueue.offer(new Request(src, dst));
+    public boolean assignRequest(int src, int dst) {
+        if (src < 0 || dst < 0) {
+            throw new IllegalArgumentException("Floor numbers must be positive");
+        }
+        if (src == dst) {
+            throw new IllegalArgumentException("Source and destination floors must be different");
+        }
+        if (src > NUM_FLOORS || dst > NUM_FLOORS) {
+            throw new IllegalArgumentException("Floor numbers must be less than " + NUM_FLOORS);
+        }
+        if (src != 0 && dst != 0) {
+            throw new IllegalArgumentException("Only the ground-floor can choose any arbitrary floor as destination");
+        }
+        var request = new AbstractMap.SimpleEntry<>(src, dst);
+        return this.requestQueue.offer(request);
     }
 
     public void shutdown() {
         alive = false;
     }
 
-    private void handleRequest(Request r) {
-
-    }
-
     @Override
     public void run() {
-        // initialize elevators
+        System.out.println("Initializing elevators...");
         IntStream.range(0, NUM_ELEVATORS).forEach(i -> {
             final var elevator = new Elevator();
             var id = elevator.getID();
@@ -40,18 +50,18 @@ public class Scheduler implements Runnable {
             this.elevators.put(id, elevator);
         });
 
-        // assign requests to elevators
+        System.out.println("Starting scheduler loop...");
         while (alive) {
             try {
-                var r = requestQueue.take();
-                handleRequest(r);
+                var r = this.requestQueue.take();
+                // find min queue size
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
-        // shutdown elevators
-        elevators.forEach((id, elevator) -> elevator.shutdown());
+        System.out.println("Cleaning up elevators...");
+        elevators.values().forEach(Elevator::shutdown);
         elevators.clear();
     }
 }
