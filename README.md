@@ -14,3 +14,8 @@
 - The requests are handled globally.
 - The elevator-scheduler assigns a random elevator to the most recent request.
 - If there are no elevators available, the request is queued up.
+
+
+# Design decisions
+
+- I decided to use vanilla Java without any non-standard libraries for the sake of simplicity.
