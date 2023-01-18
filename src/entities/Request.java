@@ -59,6 +59,6 @@ public class Request {
 
     @Override
     public String toString() {
-        return "Request{" + "id=" + id + ", srcFloor=" + srcFloor + ", dstFloor=" + dstFloor + '}';
+        return "{ " + "src=" + srcFloor + ", dst=" + dstFloor + " }";
     }
 }
