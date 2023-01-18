@@ -18,7 +18,6 @@
 # Design decisions
 
 - I decided to use vanilla Java without any non-default libraries for the sake of simplicity.
-- To create as few entities as possible and avoid boilerplate OOP code with getters and setters, I used existing data
-  structures like "Pair" instead of creating my own classes.
+- I decided to create as few entities as possible and avoid boilerplate OOP code with getters and setters.
 - I got rid of the suggested "up"/"down" directions since they can be inferred from the current floor.
 - I chose a FCFS (First-Come-First-Served) algorithm for the elevator-scheduler.

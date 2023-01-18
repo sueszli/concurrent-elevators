@@ -1,37 +1,40 @@
 package src;
 
-import src.entities.Floor;
-import src.entities.Request;
-
+import java.util.ArrayList;
 import java.util.stream.IntStream;
-
-import static src.Config.NUMBER_OF_FLOORS;
 
 public class Main {
 
-    private static void printFloors(Floor[] floors) {
-        IntStream.range(0, floors.length).forEach(i -> System.out.println(i + ": " + floors[i]));
+    public static int NUMBER_OF_FLOORS = 55;
+    public static int NUMBER_OF_ELEVATORS = 7;
+    public static int ELEVATOR_CAPACITY = 10;
+
+    private static ArrayList<Integer>[] initializeFloors(int n) {
+        ArrayList<Integer>[] floors = new ArrayList[NUMBER_OF_FLOORS];
+
+        IntStream.range(0, NUMBER_OF_FLOORS).forEach(i -> {
+            floors[i] = new ArrayList<>();
+            var numRequests = (int) (Math.random() * n);
+
+            IntStream.range(0, numRequests).forEach(j -> {
+                boolean notGroundFloor = i != 0;
+                var destination = notGroundFloor ? 0 : (int) (Math.random() * (NUMBER_OF_FLOORS - 1) + 1);
+                floors[i].add(destination);
+            });
+        });
+        return floors;
     }
 
-    private static Request generateRequest(int src) {
-        if (src == 0) {
-            return new Request(0, (int) (Math.random() * (NUMBER_OF_FLOORS - 1) + 1));
-        } else {
-            return new Request(src, 0);
-        }
+    private static void printFloors(ArrayList<Integer>[] floors) {
+        IntStream.range(0, NUMBER_OF_FLOORS).forEach(i -> System.out.println("Floor " + i + ": " + floors[i]));
     }
 
     public static void main(String[] args) {
 
-        // initialize floors with random requests
-        var floors = new Floor[NUMBER_OF_FLOORS];
-        var maxRequests = 5;
-        IntStream.range(0, NUMBER_OF_FLOORS).forEach(i -> {
-            floors[i] = new Floor();
-            var numRequests = (int) (Math.random() * maxRequests);
-            IntStream.range(0, numRequests).forEach(j -> floors[i].addRequest(generateRequest(i)));
-        });
+        // floors = request queue (people waiting for elevator)
+        // requests = destination floor numbers
+        ArrayList<Integer>[] floors = initializeFloors(5);
         printFloors(floors);
-
     }
+
 }
