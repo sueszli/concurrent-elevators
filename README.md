@@ -20,7 +20,7 @@ a learning tool.
 
 
 - The requests are handled globally.
-- The elevator-scheduler assigns a random elevator to the most recent request.
+- The elevator-scheduler assigns a chosen request to an elevator based on some arbitrary algorithm.
 - If there are no elevators available, the request is queued up.
 
 <br><br>
