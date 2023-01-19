@@ -31,3 +31,4 @@ a learning tool.
 - Got rid of the suggested "up"/"down" directions since they can be inferred from the current floor.
 - Chose a poison-pill approach to terminate the scheduler (also
   see: [this similar implementation](https://gitlab.com/niklaswimmer/dc-tower-elevator-challange/-/blob/main/app/src/main/java/me/nikx/dctower/TowerController.java))
+- Chose JDK-19 to make use of type inferrence with `var` and other nifty features. 
