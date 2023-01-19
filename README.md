@@ -16,7 +16,7 @@ a learning tool.
 
 - People can only choose their destination freely, when they are on the ground-floor:
     - up: ground-floor [0] − can only travel to ⟶ non-ground-floor [1;54]
-        - down: non-ground-floor [1;54] − can only travel to ⟶ ground-floor [0]
+    - down: non-ground-floor [1;54] − can only travel to ⟶ ground-floor [0]
 
 
 - The requests are handled globally.
