@@ -17,8 +17,9 @@
 - The elevator-scheduler assigns a random elevator to the most recent request.
 - If there are no elevators available, the request is queued up.
 
+<br><br><br>
+
 # Design decisions
 
-- I decided to use vanilla Java without any non-default libraries for the sake of simplicity.
-- I got rid of the suggested "up"/"down" directions since they can be inferred from the current floor.
-- I used a more procedural and functional style to improve readability.
+- Decided to use vanilla Java without any non-default libraries for the sake of simplicity.
+- Got rid of the suggested "up"/"down" directions since they can be inferred from the current floor.

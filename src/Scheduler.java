@@ -1,6 +1,7 @@
 package src;
 
 import java.util.AbstractMap;
+import java.util.Comparator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,41 +9,53 @@ import java.util.stream.IntStream;
 
 import static src.Main.*;
 
-// performance could be improved by using a thread pool and increasing the granularity of the locks
+// performance could be improved by using a thread pool and executor as a scheduler, but then we couldn't implement our own custom scheduling algorithm
 public class Scheduler implements Runnable {
 
     private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Integer>> requestQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentHashMap<Integer, Elevator> elevators = new ConcurrentHashMap<>();
-    private boolean alive = true;
+    private boolean alive = false;
 
     public Scheduler() {
         new Thread(this, "scheduler").start();
     }
 
-    public boolean assignRequest(int src, int dst) {
+    public boolean receiveRequest(int src, int dst) throws InterruptedException {
         if (src < 0 || dst < 0) {
-            throw new IllegalArgumentException("Floor numbers must be positive");
+            return false;
         }
         if (src == dst) {
-            throw new IllegalArgumentException("Source and destination floors must be different");
+            return false;
         }
         if (src > NUM_FLOORS || dst > NUM_FLOORS) {
-            throw new IllegalArgumentException("Floor numbers must be less than " + NUM_FLOORS);
+            return false;
         }
         if (src != 0 && dst != 0) {
-            throw new IllegalArgumentException("Only the ground-floor can choose any arbitrary floor as destination");
+            return false;
         }
+        if (requestQueue.size() == QUEUE_SIZE) {
+            return false;
+        }
+
+        System.out.println("Scheduler: received legal request: " + src + " -> " + dst);
         var request = new AbstractMap.SimpleEntry<>(src, dst);
-        return this.requestQueue.offer(request);
+        this.requestQueue.put(request);
+        return true;
+    }
+
+    public void start() {
+        System.out.println("Scheduler: received start signal");
+        alive = true;
     }
 
     public void shutdown() {
+        System.out.println("Received shutdown signal");
         alive = false;
     }
 
     @Override
     public void run() {
-        System.out.println("Initializing elevators...");
+        System.out.println("Scheduler: Initializing elevators...");
         IntStream.range(0, NUM_ELEVATORS).forEach(i -> {
             final var elevator = new Elevator();
             var id = elevator.getID();
@@ -50,17 +63,18 @@ public class Scheduler implements Runnable {
             this.elevators.put(id, elevator);
         });
 
-        System.out.println("Starting scheduler loop...");
+        System.out.println("Scheduler: Starting scheduler loop...");
         while (alive) {
             try {
-                var r = this.requestQueue.take();
-                // find min queue size
+                var request = this.requestQueue.take();
+                var selectedElevator = this.elevators.values().stream().min(Comparator.comparingInt(Elevator::getNumAssignedRequests)).orElseThrow();
+                selectedElevator.assign(request);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
-        System.out.println("Cleaning up elevators...");
+        System.out.println("Scheduler: Shutting down...");
         elevators.values().forEach(Elevator::shutdown);
         elevators.clear();
     }
