@@ -4,7 +4,7 @@ a learning tool.
 
 <br><br><br>
 
-# Assignment
+## Assignment
 
 - There are 7 elevators in a building with 55 floors.
 - Each floor has exactly one button to request an elevator.
@@ -25,7 +25,7 @@ a learning tool.
 
 <br><br><br>
 
-# Design decisions
+## Design decisions
 
 - Decided to use vanilla Java without any non-default libraries for the sake of simplicity.
 - Got rid of the suggested "up"/"down" directions since they can be inferred from the current floor.
