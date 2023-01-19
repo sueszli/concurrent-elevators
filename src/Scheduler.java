@@ -14,11 +14,6 @@ public class Scheduler implements Runnable {
 
     private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Integer>> requestQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentHashMap<Integer, Elevator> elevators = new ConcurrentHashMap<>();
-    private boolean alive = false;
-
-    public Scheduler() {
-        new Thread(this, "scheduler").start();
-    }
 
     public boolean receiveRequest(int src, int dst) throws InterruptedException {
         if (src < 0 || dst < 0) {
@@ -37,20 +32,20 @@ public class Scheduler implements Runnable {
             return false;
         }
 
-        System.out.println("Scheduler: received legal request: " + src + " -> " + dst);
+        System.out.println("Scheduler: received [" + src + " -> " + dst + "]");
         var request = new AbstractMap.SimpleEntry<>(src, dst);
         this.requestQueue.put(request);
         return true;
     }
 
     public void start() {
-        System.out.println("Scheduler: received start signal");
-        alive = true;
+        new Thread(this, "scheduler").start();
     }
 
-    public void shutdown() {
-        System.out.println("Received shutdown signal");
-        alive = false;
+    public void shutdown() throws InterruptedException {
+        // kudos to: https://gitlab.com/niklaswimmer/dc-tower-elevator-challange/-/blob/main/app/src/main/java/me/nikx/dctower/Main.java
+        var poison_pill = new AbstractMap.SimpleEntry<>(-1, -1);
+        this.requestQueue.put(poison_pill);
     }
 
     @Override
@@ -64,9 +59,13 @@ public class Scheduler implements Runnable {
         });
 
         System.out.println("Scheduler: Starting scheduler loop...");
-        while (alive) {
+        while (true) {
             try {
                 var request = this.requestQueue.take();
+                boolean isPoisonPill = request.getKey() == -1 && request.getValue() == -1;
+                if (isPoisonPill) {
+                    break;
+                }
                 var selectedElevator = this.elevators.values().stream().min(Comparator.comparingInt(Elevator::getNumAssignedRequests)).orElseThrow();
                 selectedElevator.assign(request);
             } catch (InterruptedException e) {
@@ -74,8 +73,10 @@ public class Scheduler implements Runnable {
             }
         }
 
-        System.out.println("Scheduler: Shutting down...");
+        System.out.println("Scheduler: shutting down...");
         elevators.values().forEach(Elevator::shutdown);
         elevators.clear();
+        requestQueue.clear();
+        System.out.println("Scheduler: Shut down successfully");
     }
 }

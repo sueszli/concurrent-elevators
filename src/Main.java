@@ -7,23 +7,34 @@ public class Main {
     public static final int NUM_FLOORS = 55;
     public static final int NUM_ELEVATORS = 7;
     public static final int QUEUE_SIZE = 10;
+    public static final int PROCESSING_DELAY = 1000;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+
+        // create scheduler
         Scheduler scheduler = new Scheduler();
 
+        // create requests
         IntStream.range(0, QUEUE_SIZE).forEach(i -> {
-            var src = (int) (Math.random() * NUM_FLOORS);
-            var dst = (int) (Math.random() * NUM_FLOORS);
-            var success = false;
-            while (!success) {
+            var sentRequest = false;
+            while (!sentRequest) {
+                var src = (int) (Math.random() * NUM_FLOORS);
+                var dst = (int) (Math.random() * NUM_FLOORS);
                 try {
-                    success = scheduler.receiveRequest(src, dst);
+                    sentRequest = scheduler.receiveRequest(src, dst);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         });
 
+        // start scheduler
         scheduler.start();
+
+        // wait for scheduler to finish
+        Thread.sleep(1000);
+
+        // shutdown scheduler
+        scheduler.shutdown();
     }
 }
