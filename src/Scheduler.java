@@ -60,7 +60,7 @@ public class Scheduler implements Runnable {
         while (true) {
             try {
                 var request = this.requestQueue.take();
-                boolean isPoisonPill = request.getKey() == -1 && request.getValue() == -1;
+                var isPoisonPill = request.getKey() == -1 && request.getValue() == -1;
                 if (isPoisonPill) {
                     break;
                 }
