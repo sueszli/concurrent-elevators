@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
 
         // create scheduler
-        Scheduler scheduler = new Scheduler();
+        var scheduler = new Scheduler();
 
         // create requests
         IntStream.range(0, QUEUE_SIZE).forEach(i -> {
