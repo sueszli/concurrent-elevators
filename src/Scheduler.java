@@ -9,7 +9,6 @@ import java.util.stream.IntStream;
 
 import static src.Main.*;
 
-// performance could be improved by using a thread pool and executor as a scheduler, but then we couldn't implement our own custom scheduling algorithm
 public class Scheduler implements Runnable {
 
     private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Integer>> requestQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
@@ -43,7 +42,6 @@ public class Scheduler implements Runnable {
     }
 
     public void shutdown() throws InterruptedException {
-        // kudos to: https://gitlab.com/niklaswimmer/dc-tower-elevator-challange/-/blob/main/app/src/main/java/me/nikx/dctower/Main.java
         var poison_pill = new AbstractMap.SimpleEntry<>(-1, -1);
         this.requestQueue.put(poison_pill);
     }
