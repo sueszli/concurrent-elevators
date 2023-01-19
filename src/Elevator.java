@@ -48,7 +48,7 @@ public class Elevator implements Runnable {
         while (true) {
             try {
                 var request = assignedRequests.take();
-                boolean isPoisonPill = request.getKey() == -1 && request.getValue() == -1;
+                var isPoisonPill = request.getKey() == -1 && request.getValue() == -1;
                 if (isPoisonPill) {
                     break;
                 }
