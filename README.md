@@ -2,7 +2,7 @@ A super minimal implementation of a thread-pool-executor service / scheduler in 
 easy to understand implementation. The implementation is not intended to be used in production, but rather to be used as
 a learning tool.
 
-<br><br><br>
+<br><br>
 
 ## Assignment
 
@@ -23,7 +23,7 @@ a learning tool.
 - The elevator-scheduler assigns a random elevator to the most recent request.
 - If there are no elevators available, the request is queued up.
 
-<br><br><br>
+<br><br>
 
 ## Design decisions
 
