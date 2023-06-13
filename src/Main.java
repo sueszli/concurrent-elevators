@@ -14,13 +14,13 @@ public class Main {
         // create scheduler
         var scheduler = new Scheduler();
 
-        // create requests
         IntStream.range(0, QUEUE_SIZE).forEach(i -> {
             var sentRequest = false;
             while (!sentRequest) {
                 var src = (int) (Math.random() * NUM_FLOORS);
                 var dst = (int) (Math.random() * NUM_FLOORS);
                 try {
+                    // retry sending random requests until valid
                     sentRequest = scheduler.receiveRequest(src, dst);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
