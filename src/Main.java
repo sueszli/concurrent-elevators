@@ -1,5 +1,6 @@
 package src;
 
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -14,13 +15,18 @@ public class Main {
         // create scheduler
         var scheduler = new Scheduler();
 
+        record Request(int src, int dst) {
+        }
+        Supplier requestSupplier = () -> new Request((int) (Math.random() * NUM_FLOORS),
+                (int) (Math.random() * NUM_FLOORS));
+
         IntStream.range(0, QUEUE_SIZE).forEach(i -> {
+            // retry sending random requests until valid
             var sentRequest = false;
             while (!sentRequest) {
                 var src = (int) (Math.random() * NUM_FLOORS);
                 var dst = (int) (Math.random() * NUM_FLOORS);
                 try {
-                    // retry sending random requests until valid
                     sentRequest = scheduler.receiveRequest(src, dst);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
