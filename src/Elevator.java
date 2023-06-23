@@ -1,17 +1,17 @@
 package src;
 
-import java.util.AbstractMap;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
 import static src.Main.PROCESSING_DELAY;
 import static src.Main.QUEUE_SIZE;
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import src.Scheduler.Request;
 
 public class Elevator implements Runnable {
 
     private static int ID_COUNTER = 0;
     private final int id;
-    private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Integer>> assignedRequests = new ArrayBlockingQueue<>(QUEUE_SIZE);
+    private final BlockingQueue<Request> assignedRequests = new ArrayBlockingQueue<>(QUEUE_SIZE);
 
     public Elevator() {
         this.id = ID_COUNTER++;
@@ -21,7 +21,7 @@ public class Elevator implements Runnable {
         return id;
     }
 
-    public void assign(AbstractMap.SimpleEntry<Integer, Integer> request) throws InterruptedException {
+    public void assign(Request request) throws InterruptedException {
         assignedRequests.put(request);
     }
 
@@ -29,15 +29,14 @@ public class Elevator implements Runnable {
         return assignedRequests.size();
     }
 
-    private void simulateMovement(int src, int dst) throws InterruptedException {
+    private void simulateMovement(Request request) throws InterruptedException {
         Thread.sleep(PROCESSING_DELAY);
-        System.out.println("Elevator " + this.getID() + ": resolved [" + src + " -> " + dst + "]");
+        System.out.println("Elevator " + this.getID() + ": resolved [" + request.src() + " -> " + request.dst() + "]");
     }
 
     public void shutdown() {
-        var poison_pill = new AbstractMap.SimpleEntry<>(-1, -1);
         try {
-            this.assignedRequests.put(poison_pill);
+            this.assignedRequests.put(Scheduler.POISON_PILL);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -48,11 +47,10 @@ public class Elevator implements Runnable {
         while (true) {
             try {
                 var request = assignedRequests.take();
-                var isPoisonPill = request.getKey() == -1 && request.getValue() == -1;
-                if (isPoisonPill) {
+                if (request.equals(Scheduler.POISON_PILL)) {
                     break;
                 }
-                simulateMovement(request.getKey(), request.getValue());
+                simulateMovement(request);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

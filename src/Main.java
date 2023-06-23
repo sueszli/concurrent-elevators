@@ -1,7 +1,7 @@
 package src;
 
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
+import src.Scheduler.Request;
 
 public class Main {
 
@@ -11,36 +11,23 @@ public class Main {
     public static final int PROCESSING_DELAY = 1000;
 
     public static void main(String[] args) throws InterruptedException {
-
         // create scheduler
         var scheduler = new Scheduler();
 
-        record Request(int src, int dst) {
-        }
-        Supplier requestSupplier = () -> new Request((int) (Math.random() * NUM_FLOORS),
-                (int) (Math.random() * NUM_FLOORS));
-
-        IntStream.range(0, QUEUE_SIZE).forEach(i -> {
-            // retry sending random requests until valid
-            var sentRequest = false;
-            while (!sentRequest) {
-                var src = (int) (Math.random() * NUM_FLOORS);
-                var dst = (int) (Math.random() * NUM_FLOORS);
-                try {
-                    sentRequest = scheduler.receiveRequest(src, dst);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        // send requests
+        Supplier<Request> requestGenerator = () -> new Request((int) (Math.random() * NUM_FLOORS), (int) (Math.random() * NUM_FLOORS));
+        for (int i = 0; i < QUEUE_SIZE; i++) {
+            while (true) {
+                var success = scheduler.receiveRequest(requestGenerator.get());
+                if (success) {
+                    break;
                 }
             }
-        });
+        }
 
-        // start scheduler
+        // start, wait, and shutdown scheduler
         scheduler.start();
-
-        // wait for scheduler to finish
         Thread.sleep(1000);
-
-        // shutdown scheduler
         scheduler.shutdown();
     }
 }

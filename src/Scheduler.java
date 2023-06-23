@@ -1,38 +1,33 @@
 package src;
 
-import java.util.AbstractMap;
+import static src.Main.*;
+
 import java.util.Comparator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
-import static src.Main.*;
-
 public class Scheduler implements Runnable {
 
-    private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Integer>> requestQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
+    public record Request(int src, int dst) {}
+
+    public static Request POISON_PILL = new Request(-1, -1);
+
+    private final BlockingQueue<Request> requestQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentHashMap<Integer, Elevator> elevators = new ConcurrentHashMap<>();
 
-    public boolean receiveRequest(int src, int dst) throws InterruptedException {
-        if (src < 0 || dst < 0) {
-            return false;
-        }
-        if (src == dst) {
-            return false;
-        }
-        if (src > NUM_FLOORS || dst > NUM_FLOORS) {
-            return false;
-        }
-        if (src != 0 && dst != 0) {
-            return false;
-        }
-        if (requestQueue.size() == QUEUE_SIZE) {
+    public boolean receiveRequest(Request request) throws InterruptedException {
+        var negativeFloor = request.src() < 0 || request.dst() < 0;
+        var sameFloor = request.src() == request.dst();
+        var invalidFloor = request.src() > NUM_FLOORS || request.dst() > NUM_FLOORS;
+        var bothGroundFloor = request.src() != 0 && request.dst() != 0;
+        var queueFull = requestQueue.size() == QUEUE_SIZE;
+        if (negativeFloor || sameFloor || invalidFloor || bothGroundFloor || queueFull) {
             return false;
         }
 
-        System.out.println("Scheduler: received [" + src + " -> " + dst + "]");
-        var request = new AbstractMap.SimpleEntry<>(src, dst);
+        System.out.println("Scheduler: received [" + request.src + " -> " + request.dst + "]");
         this.requestQueue.put(request);
         return true;
     }
@@ -42,26 +37,26 @@ public class Scheduler implements Runnable {
     }
 
     public void shutdown() throws InterruptedException {
-        var poison_pill = new AbstractMap.SimpleEntry<>(-1, -1);
-        this.requestQueue.put(poison_pill);
+        this.requestQueue.put(POISON_PILL);
     }
 
     @Override
     public void run() {
         System.out.println("Scheduler: Initializing elevators...");
-        IntStream.range(0, NUM_ELEVATORS).forEach(i -> {
-            final var elevator = new Elevator();
-            var id = elevator.getID();
-            new Thread(elevator, String.format("%02d", id)).start();
-            this.elevators.put(id, elevator);
-        });
+        IntStream
+            .range(0, NUM_ELEVATORS)
+            .forEach(i -> {
+                final var elevator = new Elevator();
+                var id = elevator.getID();
+                new Thread(elevator, String.format("%02d", id)).start();
+                this.elevators.put(id, elevator);
+            });
 
         System.out.println("Scheduler: Starting scheduler loop...");
         while (true) {
             try {
                 var request = this.requestQueue.take();
-                var isPoisonPill = request.getKey() == -1 && request.getValue() == -1;
-                if (isPoisonPill) {
+                if (request.equals(POISON_PILL)) {
                     break;
                 }
                 var selectedElevator = this.elevators.values().stream().min(Comparator.comparingInt(Elevator::getNumAssignedRequests)).orElseThrow();
@@ -75,6 +70,6 @@ public class Scheduler implements Runnable {
         elevators.values().forEach(Elevator::shutdown);
         elevators.clear();
         requestQueue.clear();
-        System.out.println("Scheduler: Shut down successfully");
+        System.out.println("Scheduler: shut down successfully");
     }
 }
