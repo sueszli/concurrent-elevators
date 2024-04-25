@@ -2,8 +2,6 @@ A super minimal implementation of a thread-pool-executor service / scheduler in 
 easy to understand implementation. The implementation is not intended to be used in production, but rather to be used as
 a learning tool.
 
-<br><br>
-
 ## Problem
 
 - There are 7 elevators in a building with 55 floors.
@@ -19,8 +17,6 @@ a learning tool.
 - The requests are handled globally.
 - The elevator-scheduler assigns a chosen request to an elevator based on some arbitrary algorithm.
 - If there are no elevators available, the request is queued up.
-
-<br><br>
 
 ## Design decisions
 
