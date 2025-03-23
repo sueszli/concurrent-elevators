@@ -1,6 +1,6 @@
 A super minimal implementation of a thread-pool-executor service / scheduler in Java. The goal is to provide a simple, easy to understand implementation. The implementation is not intended to be used in production, but rather to be used as a learning tool.
 
-Problem:
+Problem description:
 
 - There are 7 elevators in a building with 55 floors.
 - Each floor has exactly one button to request an elevator.
