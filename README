@@ -1,6 +1,4 @@
-A super minimal implementation of a thread-pool-executor service / scheduler in Java. The goal is to provide a simple,
-easy to understand implementation. The implementation is not intended to be used in production, but rather to be used as
-a learning tool.
+A super minimal implementation of a thread-pool-executor service / scheduler in Java. The goal is to provide a simple, easy to understand implementation. The implementation is not intended to be used in production, but rather to be used as a learning tool.
 
 Problem:
 
